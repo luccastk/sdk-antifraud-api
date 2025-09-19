@@ -1,8 +1,12 @@
 name: kotlin-api
 services:
   - name: kotlin-api
-    image: koyeb/app:latest
     type: web
+    git:
+      repository: https://github.com/luccastk/sdk-antifraud-api.git
+      branch: main
+    build:
+      type: docker
     envs:
       - key: SPRING_PROFILES_ACTIVE
         value: production
