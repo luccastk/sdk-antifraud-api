@@ -6,7 +6,8 @@ services:
       repository: https://github.com/luccastk/sdk-antifraud-api.git
       branch: main
     build:
-      type: docker
+      type: dockerfile
+      dockerfile: ./Dockerfile
     envs:
       - key: SPRING_PROFILES_ACTIVE
         value: production
@@ -14,6 +15,7 @@ services:
         value: "8080"
     ports:
       - port: 8080
+        protocol: http
         http_path: /
     regions:
       - fra
