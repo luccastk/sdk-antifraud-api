@@ -42,10 +42,10 @@ class AdvancedVerificationService(
         riskScore += consistencyRisk.first
         reasons.addAll(consistencyRisk.second)
 
-        // Determinar status final
+        // Determinar status final (ajustado para demonstração)
         val status = when {
-            riskScore >= 80 -> IpStatus.DENY
-            riskScore >= 40 -> IpStatus.REVIEW
+            riskScore >= 100 -> IpStatus.DENY
+            riskScore >= 60 -> IpStatus.REVIEW
             else -> IpStatus.ALLOW
         }
 
@@ -66,7 +66,7 @@ class AdvancedVerificationService(
         if (device.userAgent.contains("bot", ignoreCase = true) ||
             device.userAgent.contains("crawler", ignoreCase = true) ||
             device.userAgent.contains("spider", ignoreCase = true)) {
-            riskScore += 30
+            riskScore += 40
             reasons.add("User Agent suspeito detectado")
         }
 
@@ -93,18 +93,16 @@ class AdvancedVerificationService(
             }
         }
 
-        // Verificar timezone
-        if (!device.timezone.contains("America/Sao_Paulo") && 
-            !device.timezone.contains("America/Bahia") &&
-            !device.timezone.contains("America/Manaus")) {
-            riskScore += 20
-            reasons.add("Timezone não brasileiro")
+        // Verificar timezone (mais flexível para demo)
+        if (!device.timezone.contains("America/")) {
+            riskScore += 10
+            reasons.add("Timezone fora das Américas")
         }
 
-        // Verificar idioma
-        if (!device.language.startsWith("pt")) {
-            riskScore += 15
-            reasons.add("Idioma não português")
+        // Verificar idioma (mais flexível para demo)
+        if (!device.language.startsWith("pt") && !device.language.startsWith("en")) {
+            riskScore += 8
+            reasons.add("Idioma não comum")
         }
 
         // Verificar hardware
@@ -120,25 +118,25 @@ class AdvancedVerificationService(
         var riskScore = 0
         val reasons = mutableListOf<String>()
 
-        // Verificar duração da sessão
-        if (behavior.sessionDuration < 5000) { // Menos de 5 segundos
-            riskScore += 25
+        // Verificar duração da sessão (mais flexível para demo)
+        if (behavior.sessionDuration < 2000) { // Menos de 2 segundos
+            riskScore += 15
             reasons.add("Sessão muito curta")
         }
 
-        // Verificar interações mínimas
+        // Verificar interações mínimas (mais flexível para demo)
         val totalInteractions = behavior.mouseMovements + behavior.keystrokes + 
                                behavior.scrollEvents + behavior.clickEvents
         
-        if (totalInteractions < 5) {
-            riskScore += 20
+        if (totalInteractions < 2) {
+            riskScore += 12
             reasons.add("Interações insuficientes")
         }
 
-        // Verificar padrão de mouse suspeito
-        if (behavior.mouseMovements < 3) {
-            riskScore += 15
-            reasons.add("Movimentos de mouse insuficientes")
+        // Verificar padrão de mouse suspeito (mais flexível para demo)
+        if (behavior.mouseMovements < 1) {
+            riskScore += 8
+            reasons.add("Sem movimentos de mouse")
         }
 
         // Verificar tempo de carregamento

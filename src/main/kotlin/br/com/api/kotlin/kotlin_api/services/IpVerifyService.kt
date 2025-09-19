@@ -27,12 +27,13 @@ class IpVerifyService(val gsonService: GsonService) {
         println(dto)
         println(data)
 
-        return if (data.status != "success" && data.country != "Brazil") {
-            IpVerifyView(IpStatus.DENY)
-        } else if (data.status != "success" || data.country != "Brazil") {
-            IpVerifyView(IpStatus.REVIEW)
-        } else {
-            IpVerifyView(IpStatus.ALLOW)
+        // Lógica mais flexível para demonstração
+        return when {
+            data.status != "success" -> IpVerifyView(IpStatus.REVIEW)
+            data.country == "Brazil" -> IpVerifyView(IpStatus.ALLOW)
+            data.country in listOf("United States", "Canada", "Argentina", "Chile", "Uruguay") -> IpVerifyView(IpStatus.ALLOW)
+            data.country in listOf("China", "Russia", "Iran", "North Korea") -> IpVerifyView(IpStatus.DENY)
+            else -> IpVerifyView(IpStatus.REVIEW)
         }
     }
 }

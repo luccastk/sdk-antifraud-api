@@ -16,7 +16,7 @@ services:
       - port: 8080
         protocol: http
         http_path: /
-    regions: [ fra, sin, iad, sfo ]
+    regions: [fra, sin, iad, sfo]
     instances:
       type: nano
       min_instances: 1
