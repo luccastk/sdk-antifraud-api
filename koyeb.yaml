@@ -1,6 +1,6 @@
-name: kotlin-api
+name: sdk-antifraud-api
 services:
-  - name: kotlin-api
+  - name: sdk-antifraud-api
     type: web
     git:
       repository: https://github.com/luccastk/sdk-antifraud-api.git
