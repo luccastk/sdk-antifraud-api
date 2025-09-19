@@ -1,0 +1,36 @@
+name: sdk-antifraud-api
+services:
+  - name: sdk-antifraud-api
+    type: web
+    git:
+      repository: https://github.com/luccastk/sdk-antifraud-api.git
+      branch: main
+    build:
+      type: buildpack
+      build_command: "./gradlew clean build -x test"
+      run_command: "java -jar build/libs/kotlin-api-0.0.1-SNAPSHOT.jar"
+    envs:
+      - key: SPRING_PROFILES_ACTIVE
+        value: production
+      - key: SERVER_PORT
+        value: "8000"
+    ports:
+      - port: 8000
+        protocol: http
+        http_path: /
+    regions:
+      - fra
+      - sin
+      - iad
+      - sfo
+    instances:
+      type: nano
+      min_instances: 1
+      max_instances: 3
+    health_checks:
+      http_path: /actuator/health
+      initial_delay: 30
+      period: 10
+      timeout: 5
+      success_threshold: 1
+      failure_threshold: 3
