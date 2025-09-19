@@ -6,23 +6,17 @@ services:
       repository: https://github.com/luccastk/sdk-antifraud-api.git
       branch: main
     build:
-      type: buildpack
-      build_command: "./gradlew clean build -x test"
-      run_command: "java -jar build/libs/kotlin-api-0.0.1-SNAPSHOT.jar"
+      type: dockerfile
+      dockerfile: Dockerfile
+      context: .
     envs:
       - key: SPRING_PROFILES_ACTIVE
         value: production
-      - key: SERVER_PORT
-        value: "8000"
     ports:
-      - port: 8000
+      - port: 8080
         protocol: http
         http_path: /
-    regions:
-      - fra
-      - sin
-      - iad
-      - sfo
+    regions: [ fra, sin, iad, sfo ]
     instances:
       type: nano
       min_instances: 1
