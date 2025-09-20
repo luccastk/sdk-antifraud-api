@@ -58,6 +58,88 @@ class AdvancedVerificationService(
         )
     }
 
+    fun verifyFingerprintAdvanced(request: VerificationRequestDTO): AdvancedVerificationResponseDTO {
+        val reasons = mutableListOf<String>()
+        var riskScore = 0
+
+        // Análise do dispositivo
+        val deviceRisk = analyzeDeviceFingerprint(request.fingerprint.device)
+        riskScore += deviceRisk.first
+        reasons.addAll(deviceRisk.second)
+
+        // Análise do comportamento
+        val behaviorRisk = analyzeBehaviorFingerprint(request.fingerprint.behavior)
+        riskScore += behaviorRisk.first
+        reasons.addAll(behaviorRisk.second)
+
+        // Análise da rede (IP)
+        val networkRisk = analyzeNetworkFingerprint(request.fingerprint.network)
+        riskScore += networkRisk.first
+        reasons.addAll(networkRisk.second)
+
+        // Análise de consistência
+        val consistencyRisk = analyzeConsistency(request.fingerprint)
+        riskScore += consistencyRisk.first
+        reasons.addAll(consistencyRisk.second)
+
+        // Determinar status final (ajustado para demonstração)
+        val status = when {
+            riskScore >= 100 -> IpStatus.DENY
+            riskScore >= 60 -> IpStatus.REVIEW
+            else -> IpStatus.ALLOW
+        }
+
+        // Criar análise detalhada por categoria
+        val analysis = VerificationAnalysisDTO(
+            device = CategoryAnalysisDTO(
+                score = deviceRisk.first,
+                riskLevel = when {
+                    deviceRisk.first >= 30 -> "HIGH_RISK"
+                    deviceRisk.first >= 15 -> "MEDIUM_RISK"
+                    else -> "LOW_RISK"
+                },
+                factors = deviceRisk.second
+            ),
+            behavior = CategoryAnalysisDTO(
+                score = behaviorRisk.first,
+                riskLevel = when {
+                    behaviorRisk.first >= 30 -> "HIGH_RISK"
+                    behaviorRisk.first >= 15 -> "MEDIUM_RISK"
+                    else -> "LOW_RISK"
+                },
+                factors = behaviorRisk.second
+            ),
+            network = CategoryAnalysisDTO(
+                score = networkRisk.first,
+                riskLevel = when {
+                    networkRisk.first >= 30 -> "HIGH_RISK"
+                    networkRisk.first >= 15 -> "MEDIUM_RISK"
+                    else -> "LOW_RISK"
+                },
+                factors = networkRisk.second
+            ),
+            consistency = CategoryAnalysisDTO(
+                score = consistencyRisk.first,
+                riskLevel = when {
+                    consistencyRisk.first >= 30 -> "HIGH_RISK"
+                    consistencyRisk.first >= 15 -> "MEDIUM_RISK"
+                    else -> "LOW_RISK"
+                },
+                factors = consistencyRisk.second
+            )
+        )
+
+        return AdvancedVerificationResponseDTO(
+            status = status,
+            riskScore = riskScore,
+            reasons = reasons,
+            sessionId = request.fingerprint.sessionId,
+            ip = request.fingerprint.network.ip,
+            analysis = analysis,
+            timestamp = System.currentTimeMillis()
+        )
+    }
+
     private fun analyzeDeviceFingerprint(device: DeviceFingerprintDTO): Pair<Int, List<String>> {
         var riskScore = 0
         val reasons = mutableListOf<String>()
@@ -164,11 +246,11 @@ class AdvancedVerificationService(
             when (ipResult.status) {
                 IpStatus.DENY -> {
                     riskScore += 40
-                    reasons.add("IP bloqueado", network.ip)
+                    reasons.add("IP bloqueado")
                 }
                 IpStatus.REVIEW -> {
                     riskScore += 20
-                    reasons.add("IP em revisão", network.ip)
+                    reasons.add("IP em revisão")
                 }
                 IpStatus.ALLOW -> {
                     // IP aprovado, sem penalização

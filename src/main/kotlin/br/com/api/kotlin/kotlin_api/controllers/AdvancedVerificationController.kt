@@ -1,5 +1,6 @@
 package br.com.api.kotlin.kotlin_api.controllers
 
+import br.com.api.kotlin.kotlin_api.dtos.AdvancedVerificationResponseDTO
 import br.com.api.kotlin.kotlin_api.dtos.VerificationRequestDTO
 import br.com.api.kotlin.kotlin_api.dtos.VerificationResponseDTO
 import br.com.api.kotlin.kotlin_api.services.AdvancedVerificationService
@@ -37,6 +38,27 @@ class AdvancedVerificationController(
             ResponseEntity.ok(result)
         } catch (e: Exception) {
             println("Erro na verificação de fingerprint: ${e.message}")
+            ResponseEntity.badRequest().build()
+        }
+    }
+
+    @PostMapping("/advanced")
+    @Operation(
+        summary = "Verificar Fingerprint Avançado",
+        description = "Realiza verificação avançada com análise detalhada por categoria e retorna o IP do usuário"
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(responseCode = "200", description = "Verificação avançada realizada com sucesso"),
+            ApiResponse(responseCode = "400", description = "Dados de entrada inválidos ou erro na verificação")
+        ]
+    )
+    fun verifyFingerprintAdvanced(@RequestBody request: VerificationRequestDTO): ResponseEntity<AdvancedVerificationResponseDTO> {
+        return try {
+            val result = advancedVerificationService.verifyFingerprintAdvanced(request)
+            ResponseEntity.ok(result)
+        } catch (e: Exception) {
+            println("Erro na verificação avançada de fingerprint: ${e.message}")
             ResponseEntity.badRequest().build()
         }
     }
