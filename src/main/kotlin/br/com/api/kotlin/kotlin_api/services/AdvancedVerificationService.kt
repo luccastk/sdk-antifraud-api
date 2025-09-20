@@ -164,11 +164,11 @@ class AdvancedVerificationService(
             when (ipResult.status) {
                 IpStatus.DENY -> {
                     riskScore += 40
-                    reasons.add("IP bloqueado")
+                    reasons.add("IP bloqueado", network.ip)
                 }
                 IpStatus.REVIEW -> {
                     riskScore += 20
-                    reasons.add("IP em revisão")
+                    reasons.add("IP em revisão", network.ip)
                 }
                 IpStatus.ALLOW -> {
                     // IP aprovado, sem penalização
