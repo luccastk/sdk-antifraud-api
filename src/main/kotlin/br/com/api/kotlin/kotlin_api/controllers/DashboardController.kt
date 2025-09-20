@@ -1,4 +1,4 @@
-package br.com.api.kotlin.kotlin_api.controller
+package br.com.api.kotlin.kotlin_api.controllers
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.responses.ApiResponse
