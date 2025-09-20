@@ -42,10 +42,10 @@ class AdvancedVerificationService(
         riskScore += consistencyRisk.first
         reasons.addAll(consistencyRisk.second)
 
-        // Determinar status final (ajustado para demonstração)
+        // Determinar status final (ajustado para ser menos restritivo)
         val status = when {
-            riskScore >= 100 -> IpStatus.DENY
-            riskScore >= 60 -> IpStatus.REVIEW
+            riskScore >= 80 -> IpStatus.DENY
+            riskScore >= 40 -> IpStatus.REVIEW
             else -> IpStatus.ALLOW
         }
 
@@ -82,10 +82,10 @@ class AdvancedVerificationService(
         riskScore += consistencyRisk.first
         reasons.addAll(consistencyRisk.second)
 
-        // Determinar status final (ajustado para demonstração)
+        // Determinar status final (ajustado para ser menos restritivo)
         val status = when {
-            riskScore >= 100 -> IpStatus.DENY
-            riskScore >= 60 -> IpStatus.REVIEW
+            riskScore >= 80 -> IpStatus.DENY
+            riskScore >= 40 -> IpStatus.REVIEW
             else -> IpStatus.ALLOW
         }
 
@@ -140,6 +140,66 @@ class AdvancedVerificationService(
         )
     }
 
+    fun verifyDeviceOnly(request: VerificationRequestDTO): VerificationResponseDTO {
+        val deviceRisk = analyzeDeviceFingerprint(request.fingerprint.device)
+        val riskScore = deviceRisk.first
+        val reasons = deviceRisk.second
+
+        val status = when {
+            riskScore >= 50 -> IpStatus.DENY
+            riskScore >= 25 -> IpStatus.REVIEW
+            else -> IpStatus.ALLOW
+        }
+
+        return VerificationResponseDTO(
+            status = status,
+            riskScore = riskScore,
+            reasons = reasons,
+            sessionId = request.fingerprint.sessionId,
+            timestamp = System.currentTimeMillis()
+        )
+    }
+
+    fun verifyBehaviorOnly(request: VerificationRequestDTO): VerificationResponseDTO {
+        val behaviorRisk = analyzeBehaviorFingerprint(request.fingerprint.behavior)
+        val riskScore = behaviorRisk.first
+        val reasons = behaviorRisk.second
+
+        val status = when {
+            riskScore >= 40 -> IpStatus.DENY
+            riskScore >= 20 -> IpStatus.REVIEW
+            else -> IpStatus.ALLOW
+        }
+
+        return VerificationResponseDTO(
+            status = status,
+            riskScore = riskScore,
+            reasons = reasons,
+            sessionId = request.fingerprint.sessionId,
+            timestamp = System.currentTimeMillis()
+        )
+    }
+
+    fun verifyNetworkOnly(request: VerificationRequestDTO): VerificationResponseDTO {
+        val networkRisk = analyzeNetworkFingerprint(request.fingerprint.network)
+        val riskScore = networkRisk.first
+        val reasons = networkRisk.second
+
+        val status = when {
+            riskScore >= 50 -> IpStatus.DENY
+            riskScore >= 25 -> IpStatus.REVIEW
+            else -> IpStatus.ALLOW
+        }
+
+        return VerificationResponseDTO(
+            status = status,
+            riskScore = riskScore,
+            reasons = reasons,
+            sessionId = request.fingerprint.sessionId,
+            timestamp = System.currentTimeMillis()
+        )
+    }
+
     private fun analyzeDeviceFingerprint(device: DeviceFingerprintDTO): Pair<Int, List<String>> {
         var riskScore = 0
         val reasons = mutableListOf<String>()
@@ -148,14 +208,17 @@ class AdvancedVerificationService(
         if (device.userAgent.contains("bot", ignoreCase = true) ||
             device.userAgent.contains("crawler", ignoreCase = true) ||
             device.userAgent.contains("spider", ignoreCase = true)) {
-            riskScore += 40
+            riskScore += 30
             reasons.add("User Agent suspeito detectado")
         }
 
-        // Verificar plugins suspeitos
-        if (device.plugins.isEmpty() || device.plugins.size < 2) {
-            riskScore += 15
-            reasons.add("Número insuficiente de plugins")
+        // Verificar plugins suspeitos (mais flexível)
+        if (device.plugins.isEmpty()) {
+            riskScore += 10
+            reasons.add("Nenhum plugin detectado")
+        } else if (device.plugins.size < 2) {
+            riskScore += 5
+            reasons.add("Poucos plugins detectados")
         }
 
         // Verificar resolução de tela suspeita
@@ -175,16 +238,16 @@ class AdvancedVerificationService(
             }
         }
 
-        // Verificar timezone (mais flexível para demo)
-        if (!device.timezone.contains("America/")) {
-            riskScore += 10
-            reasons.add("Timezone fora das Américas")
+        // Verificar timezone (mais flexível)
+        if (!device.timezone.contains("America/") && !device.timezone.contains("UTC") && !device.timezone.contains("Europe/")) {
+            riskScore += 5
+            reasons.add("Timezone pouco comum")
         }
 
-        // Verificar idioma (mais flexível para demo)
-        if (!device.language.startsWith("pt") && !device.language.startsWith("en")) {
-            riskScore += 8
-            reasons.add("Idioma não comum")
+        // Verificar idioma (mais flexível)
+        if (!device.language.startsWith("pt") && !device.language.startsWith("en") && !device.language.startsWith("es")) {
+            riskScore += 3
+            reasons.add("Idioma pouco comum")
         }
 
         // Verificar hardware
@@ -200,19 +263,22 @@ class AdvancedVerificationService(
         var riskScore = 0
         val reasons = mutableListOf<String>()
 
-        // Verificar duração da sessão (mais flexível para demo)
-        if (behavior.sessionDuration < 2000) { // Menos de 2 segundos
-            riskScore += 15
+        // Verificar duração da sessão (mais flexível)
+        if (behavior.sessionDuration < 1000) { // Menos de 1 segundo
+            riskScore += 10
             reasons.add("Sessão muito curta")
         }
 
-        // Verificar interações mínimas (mais flexível para demo)
+        // Verificar interações mínimas (mais flexível)
         val totalInteractions = behavior.mouseMovements + behavior.keystrokes + 
                                behavior.scrollEvents + behavior.clickEvents
         
-        if (totalInteractions < 2) {
-            riskScore += 12
-            reasons.add("Interações insuficientes")
+        if (totalInteractions == 0) {
+            riskScore += 15
+            reasons.add("Nenhuma interação detectada")
+        } else if (totalInteractions < 3) {
+            riskScore += 5
+            reasons.add("Poucas interações detectadas")
         }
 
         // Verificar padrão de mouse suspeito (mais flexível para demo)

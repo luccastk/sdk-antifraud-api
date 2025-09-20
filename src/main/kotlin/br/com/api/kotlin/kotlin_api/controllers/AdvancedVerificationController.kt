@@ -25,8 +25,8 @@ class AdvancedVerificationController(
 
     @PostMapping
     @Operation(
-        summary = "Verificar Fingerprint",
-        description = "Realiza verificação avançada baseada em fingerprint do dispositivo e comportamento do usuário"
+        summary = "Verificar Fingerprint Completo",
+        description = "Realiza verificação completa baseada em fingerprint do dispositivo e comportamento do usuário"
     )
     @ApiResponses(
         value = [
@@ -61,6 +61,69 @@ class AdvancedVerificationController(
             ResponseEntity.ok(result)
         } catch (e: Exception) {
             println("Erro na verificação avançada de fingerprint: ${e.message}")
+            ResponseEntity.badRequest().build()
+        }
+    }
+
+    @PostMapping("/device")
+    @Operation(
+        summary = "Verificar Apenas Dispositivo",
+        description = "Realiza verificação focada apenas no fingerprint do dispositivo"
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(responseCode = "200", description = "Verificação de dispositivo realizada com sucesso"),
+            ApiResponse(responseCode = "400", description = "Dados de entrada inválidos")
+        ]
+    )
+    fun verifyDevice(@RequestBody request: VerificationRequestDTO): ResponseEntity<VerificationResponseDTO> {
+        return try {
+            val result = advancedVerificationService.verifyDeviceOnly(request)
+            ResponseEntity.ok(result)
+        } catch (e: Exception) {
+            println("Erro na verificação de dispositivo: ${e.message}")
+            ResponseEntity.badRequest().build()
+        }
+    }
+
+    @PostMapping("/behavior")
+    @Operation(
+        summary = "Verificar Apenas Comportamento",
+        description = "Realiza verificação focada apenas no comportamento do usuário"
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(responseCode = "200", description = "Verificação comportamental realizada com sucesso"),
+            ApiResponse(responseCode = "400", description = "Dados de entrada inválidos")
+        ]
+    )
+    fun verifyBehavior(@RequestBody request: VerificationRequestDTO): ResponseEntity<VerificationResponseDTO> {
+        return try {
+            val result = advancedVerificationService.verifyBehaviorOnly(request)
+            ResponseEntity.ok(result)
+        } catch (e: Exception) {
+            println("Erro na verificação comportamental: ${e.message}")
+            ResponseEntity.badRequest().build()
+        }
+    }
+
+    @PostMapping("/network")
+    @Operation(
+        summary = "Verificar Apenas Rede/IP",
+        description = "Realiza verificação focada apenas na rede e IP do usuário"
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(responseCode = "200", description = "Verificação de rede realizada com sucesso"),
+            ApiResponse(responseCode = "400", description = "Dados de entrada inválidos")
+        ]
+    )
+    fun verifyNetwork(@RequestBody request: VerificationRequestDTO): ResponseEntity<VerificationResponseDTO> {
+        return try {
+            val result = advancedVerificationService.verifyNetworkOnly(request)
+            ResponseEntity.ok(result)
+        } catch (e: Exception) {
+            println("Erro na verificação de rede: ${e.message}")
             ResponseEntity.badRequest().build()
         }
     }
