@@ -44,7 +44,7 @@ class AdvancedVerificationService(
 
         // Determinar status final (ajustado para ser menos restritivo)
         val status = when {
-            riskScore >= 80 -> IpStatus.DENY
+            riskScore >= 120 -> IpStatus.DENY
             riskScore >= 40 -> IpStatus.REVIEW
             else -> IpStatus.ALLOW
         }
