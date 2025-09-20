@@ -16,7 +16,7 @@ class CorsConfig : WebMvcConfigurer {
             .allowedOriginPatterns("*")
             .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH")
             .allowedHeaders("*")
-            .allowCredentials(true)
+            .allowCredentials(false)
             .maxAge(3600)
     }
 
@@ -26,7 +26,7 @@ class CorsConfig : WebMvcConfigurer {
         configuration.allowedOriginPatterns = listOf("*")
         configuration.allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH")
         configuration.allowedHeaders = listOf("*")
-        configuration.allowCredentials = true
+        configuration.allowCredentials = false
         configuration.maxAge = 3600L
 
         val source = UrlBasedCorsConfigurationSource()
