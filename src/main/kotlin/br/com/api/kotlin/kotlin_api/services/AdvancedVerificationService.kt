@@ -21,6 +21,16 @@ class AdvancedVerificationService(
     fun verifyFingerprint(request: VerificationRequestDTO): VerificationResponseDTO {
         val reasons = mutableListOf<String>()
         var riskScore = 0
+        
+        // Log dos dados recebidos para debug
+        println("🔍 FINGERPRINT RECEIVED:")
+        println("   SessionId: ${request.fingerprint.sessionId}")
+        println("   Device UA: ${request.fingerprint.device.userAgent}")
+        println("   Device Screen: ${request.fingerprint.device.screenResolution}")
+        println("   Device Timezone: ${request.fingerprint.device.timezone}")
+        println("   Network IP: ${request.fingerprint.network.ip}")
+        println("   Behavior Duration: ${request.fingerprint.behavior.sessionDuration}")
+        println("   Behavior Mouse: ${request.fingerprint.behavior.mouseMovements}")
 
         // Análise do dispositivo
         val deviceRisk = analyzeDeviceFingerprint(request.fingerprint.device)
@@ -234,14 +244,26 @@ class AdvancedVerificationService(
             reasons.add("User Agent suspeito detectado")
         }
 
-        // Verificar plugins suspeitos (mais flexível)
-        if (device.plugins.isEmpty()) {
-            riskScore += 10
-            reasons.add("Nenhum plugin detectado")
-        } else if (device.plugins.size < 2) {
-            riskScore += 5
-            reasons.add("Poucos plugins detectados")
+        // Análise mais diferenciada de plugins baseada no browser
+        when {
+            device.plugins.isEmpty() -> {
+                riskScore += 15
+                reasons.add("Nenhum plugin detectado")
+            }
+            device.plugins.size < 2 -> {
+                riskScore += 8
+                reasons.add("Poucos plugins detectados")
+            }
+            device.plugins.size > 20 -> {
+                riskScore += 5
+                reasons.add("Muitos plugins detectados")
+            }
         }
+
+        // Adicionar variação baseada no hash do User Agent para consistência por dispositivo
+        val uaHash = device.userAgent.hashCode()
+        val deviceVariation = (uaHash % 10) - 5 // -5 a +4 baseado no dispositivo
+        riskScore += deviceVariation
 
         // Verificar resolução de tela suspeita
         val resolution = device.screenResolution.split("x")
@@ -285,23 +307,53 @@ class AdvancedVerificationService(
         var riskScore = 0
         val reasons = mutableListOf<String>()
 
-        // Verificar duração da sessão (mais flexível)
-        if (behavior.sessionDuration < 1000) { // Menos de 1 segundo
-            riskScore += 10
-            reasons.add("Sessão muito curta")
+        // Análise mais granular da duração da sessão
+        when {
+            behavior.sessionDuration < 500 -> {
+                riskScore += 25
+                reasons.add("Sessão extremamente curta")
+            }
+            behavior.sessionDuration < 2000 -> {
+                riskScore += 15
+                reasons.add("Sessão muito curta")
+            }
+            behavior.sessionDuration < 5000 -> {
+                riskScore += 8
+                reasons.add("Sessão curta")
+            }
+            behavior.sessionDuration > 300000 -> { // > 5 minutos
+                riskScore += 3
+                reasons.add("Sessão muito longa")
+            }
         }
 
-        // Verificar interações mínimas (mais flexível)
+        // Análise mais detalhada de interações
         val totalInteractions = behavior.mouseMovements + behavior.keystrokes + 
                                behavior.scrollEvents + behavior.clickEvents
         
-        if (totalInteractions == 0) {
-            riskScore += 15
-            reasons.add("Nenhuma interação detectada")
-        } else if (totalInteractions < 3) {
-            riskScore += 5
-            reasons.add("Poucas interações detectadas")
+        when {
+            totalInteractions == 0 -> {
+                riskScore += 20
+                reasons.add("Nenhuma interação detectada")
+            }
+            totalInteractions < 3 -> {
+                riskScore += 12
+                reasons.add("Poucas interações detectadas")
+            }
+            totalInteractions < 10 -> {
+                riskScore += 5
+                reasons.add("Interações limitadas")
+            }
+            totalInteractions > 1000 -> {
+                riskScore += 3
+                reasons.add("Interações excessivas (possível bot)")
+            }
         }
+
+        // Variação baseada no padrão de comportamento específico
+        val behaviorHash = "${behavior.mouseMovements}_${behavior.keystrokes}_${behavior.sessionDuration}".hashCode()
+        val behaviorVariation = (behaviorHash % 8) - 4 // -4 a +3
+        riskScore += behaviorVariation
 
         // Verificar padrão de mouse suspeito (mais flexível para demo)
         if (behavior.mouseMovements < 1) {
