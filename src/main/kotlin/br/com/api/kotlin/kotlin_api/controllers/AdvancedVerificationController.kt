@@ -37,7 +37,11 @@ class AdvancedVerificationController(
     fun verifyFingerprint(@RequestBody request: VerificationRequestDTO): ResponseEntity<VerificationResponseDTO> {
         return try {
             val result = advancedVerificationService.verifyFingerprint(request)
-            ResponseEntity.ok(result)
+            ResponseEntity.ok()
+                .header("Cache-Control", "no-cache, no-store, must-revalidate")
+                .header("Pragma", "no-cache")
+                .header("Expires", "0")
+                .body(result)
         } catch (e: Exception) {
             println("Erro na verificação de fingerprint: ${e.message}")
             ResponseEntity.badRequest().build()
@@ -58,7 +62,11 @@ class AdvancedVerificationController(
     fun verifyFingerprintAdvanced(@RequestBody request: VerificationRequestDTO): ResponseEntity<AdvancedVerificationResponseDTO> {
         return try {
             val result = advancedVerificationService.verifyFingerprintAdvanced(request)
-            ResponseEntity.ok(result)
+            ResponseEntity.ok()
+                .header("Cache-Control", "no-cache, no-store, must-revalidate")
+                .header("Pragma", "no-cache")
+                .header("Expires", "0")
+                .body(result)
         } catch (e: Exception) {
             println("Erro na verificação avançada de fingerprint: ${e.message}")
             ResponseEntity.badRequest().build()

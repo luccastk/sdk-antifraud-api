@@ -51,6 +51,10 @@ class IpVerifyController(private val service: IpVerifyService) {
             timestamp = System.currentTimeMillis()
         )
         
-        return ResponseEntity.ok(response)
+        return ResponseEntity.ok()
+            .header("Cache-Control", "no-cache, no-store, must-revalidate")
+            .header("Pragma", "no-cache")
+            .header("Expires", "0")
+            .body(response)
     }
 }
