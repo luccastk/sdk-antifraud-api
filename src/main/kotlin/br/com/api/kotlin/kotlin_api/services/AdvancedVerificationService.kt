@@ -49,11 +49,14 @@ class AdvancedVerificationService(
             else -> IpStatus.ALLOW
         }
 
+        // Gerar sessionId único para cada verificação
+        val uniqueSessionId = "session_${System.currentTimeMillis()}_${(Math.random() * 1000000).toInt()}"
+
         return VerificationResponseDTO(
             status = status,
             riskScore = riskScore,
             reasons = reasons,
-            sessionId = request.fingerprint.sessionId,
+            sessionId = uniqueSessionId,
             timestamp = System.currentTimeMillis()
         )
     }
@@ -129,11 +132,14 @@ class AdvancedVerificationService(
             )
         )
 
+        // Gerar sessionId único para cada verificação avançada
+        val uniqueSessionId = "session_${System.currentTimeMillis()}_${(Math.random() * 1000000).toInt()}"
+        
         return AdvancedVerificationResponseDTO(
             status = status,
             riskScore = riskScore,
             reasons = reasons,
-            sessionId = request.fingerprint.sessionId,
+            sessionId = uniqueSessionId,
             ip = request.fingerprint.network.ip,
             analysis = analysis,
             timestamp = System.currentTimeMillis()
@@ -155,7 +161,7 @@ class AdvancedVerificationService(
             status = status,
             riskScore = riskScore,
             reasons = reasons,
-            sessionId = request.fingerprint.sessionId,
+            sessionId = "session_${System.currentTimeMillis()}_${(Math.random() * 1000000).toInt()}",
             timestamp = System.currentTimeMillis()
         )
     }
@@ -175,7 +181,7 @@ class AdvancedVerificationService(
             status = status,
             riskScore = riskScore,
             reasons = reasons,
-            sessionId = request.fingerprint.sessionId,
+            sessionId = "session_${System.currentTimeMillis()}_${(Math.random() * 1000000).toInt()}",
             timestamp = System.currentTimeMillis()
         )
     }
@@ -195,7 +201,7 @@ class AdvancedVerificationService(
             status = status,
             riskScore = riskScore,
             reasons = reasons,
-            sessionId = request.fingerprint.sessionId,
+            sessionId = "session_${System.currentTimeMillis()}_${(Math.random() * 1000000).toInt()}",
             timestamp = System.currentTimeMillis()
         )
     }

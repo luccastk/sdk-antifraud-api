@@ -35,6 +35,9 @@ class IpVerifyController(private val service: IpVerifyService) {
     fun verifyIp(@RequestBody dto: IpVerifyDTO): ResponseEntity<VerificationResponseDTO> {
         val result = service.verifyIp(dto)
         
+        // Gerar sessionId único para cada requisição
+        val uniqueSessionId = "session_${System.currentTimeMillis()}_${(Math.random() * 1000000).toInt()}"
+        
         val response = VerificationResponseDTO(
             status = result.status,
             riskScore = when (result.status) {
@@ -47,7 +50,7 @@ class IpVerifyController(private val service: IpVerifyService) {
                 br.com.api.kotlin.kotlin_api.enums.IpStatus.REVIEW -> listOf("IP em revisão")
                 br.com.api.kotlin.kotlin_api.enums.IpStatus.DENY -> listOf("IP bloqueado")
             },
-            sessionId = "",
+            sessionId = uniqueSessionId,
             timestamp = System.currentTimeMillis()
         )
         
