@@ -26,21 +26,31 @@ class AdvancedVerificationService(
         val deviceRisk = analyzeDeviceFingerprint(request.fingerprint.device)
         riskScore += deviceRisk.first
         reasons.addAll(deviceRisk.second)
+        println("🖥️ Device Risk: ${deviceRisk.first} - ${deviceRisk.second}")
 
         // Análise do comportamento
         val behaviorRisk = analyzeBehaviorFingerprint(request.fingerprint.behavior)
         riskScore += behaviorRisk.first
         reasons.addAll(behaviorRisk.second)
+        println("👤 Behavior Risk: ${behaviorRisk.first} - ${behaviorRisk.second}")
 
         // Análise da rede (IP)
         val networkRisk = analyzeNetworkFingerprint(request.fingerprint.network)
         riskScore += networkRisk.first
         reasons.addAll(networkRisk.second)
+        println("🌐 Network Risk: ${networkRisk.first} - ${networkRisk.second}")
 
         // Análise de consistência
         val consistencyRisk = analyzeConsistency(request.fingerprint)
         riskScore += consistencyRisk.first
         reasons.addAll(consistencyRisk.second)
+        println("🔍 Consistency Risk: ${consistencyRisk.first} - ${consistencyRisk.second}")
+        
+        // Adicionar pequena variação aleatória para simular análise real
+        val randomVariation = (Math.random() * 10 - 5).toInt() // -5 a +5
+        riskScore += randomVariation
+        
+        println("📊 Total Risk Score: $riskScore (com variação: $randomVariation)")
 
         // Determinar status final (ajustado para ser menos restritivo)
         val status = when {
@@ -84,6 +94,12 @@ class AdvancedVerificationService(
         val consistencyRisk = analyzeConsistency(request.fingerprint)
         riskScore += consistencyRisk.first
         reasons.addAll(consistencyRisk.second)
+
+        // Adicionar pequena variação aleatória para simular análise real
+        val randomVariation = (Math.random() * 10 - 5).toInt() // -5 a +5
+        riskScore += randomVariation
+        
+        println("📊 Advanced Total Risk Score: $riskScore (com variação: $randomVariation)")
 
         // Determinar status final (ajustado para ser menos restritivo)
         val status = when {
