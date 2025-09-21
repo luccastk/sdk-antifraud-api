@@ -21,46 +21,26 @@ class AdvancedVerificationService(
     fun verifyFingerprint(request: VerificationRequestDTO): VerificationResponseDTO {
         val reasons = mutableListOf<String>()
         var riskScore = 0
-        
-        // Log dos dados recebidos para debug
-        println("🔍 FINGERPRINT RECEIVED:")
-        println("   SessionId: ${request.fingerprint.sessionId}")
-        println("   Device UA: ${request.fingerprint.device.userAgent}")
-        println("   Device Screen: ${request.fingerprint.device.screenResolution}")
-        println("   Device Timezone: ${request.fingerprint.device.timezone}")
-        println("   Network IP: ${request.fingerprint.network.ip}")
-        println("   Behavior Duration: ${request.fingerprint.behavior.sessionDuration}")
-        println("   Behavior Mouse: ${request.fingerprint.behavior.mouseMovements}")
 
         // Análise do dispositivo
         val deviceRisk = analyzeDeviceFingerprint(request.fingerprint.device)
         riskScore += deviceRisk.first
         reasons.addAll(deviceRisk.second)
-        println("🖥️ Device Risk: ${deviceRisk.first} - ${deviceRisk.second}")
 
         // Análise do comportamento
         val behaviorRisk = analyzeBehaviorFingerprint(request.fingerprint.behavior)
         riskScore += behaviorRisk.first
         reasons.addAll(behaviorRisk.second)
-        println("👤 Behavior Risk: ${behaviorRisk.first} - ${behaviorRisk.second}")
 
         // Análise da rede (IP)
         val networkRisk = analyzeNetworkFingerprint(request.fingerprint.network)
         riskScore += networkRisk.first
         reasons.addAll(networkRisk.second)
-        println("🌐 Network Risk: ${networkRisk.first} - ${networkRisk.second}")
 
         // Análise de consistência
         val consistencyRisk = analyzeConsistency(request.fingerprint)
         riskScore += consistencyRisk.first
         reasons.addAll(consistencyRisk.second)
-        println("🔍 Consistency Risk: ${consistencyRisk.first} - ${consistencyRisk.second}")
-        
-        // Adicionar pequena variação aleatória para simular análise real
-        val randomVariation = (Math.random() * 10 - 5).toInt() // -5 a +5
-        riskScore += randomVariation
-        
-        println("📊 Total Risk Score: $riskScore (com variação: $randomVariation)")
 
         // Determinar status final (ajustado para ser menos restritivo)
         val status = when {
@@ -104,12 +84,6 @@ class AdvancedVerificationService(
         val consistencyRisk = analyzeConsistency(request.fingerprint)
         riskScore += consistencyRisk.first
         reasons.addAll(consistencyRisk.second)
-
-        // Adicionar pequena variação aleatória para simular análise real
-        val randomVariation = (Math.random() * 10 - 5).toInt() // -5 a +5
-        riskScore += randomVariation
-        
-        println("📊 Advanced Total Risk Score: $riskScore (com variação: $randomVariation)")
 
         // Determinar status final (ajustado para ser menos restritivo)
         val status = when {
@@ -260,10 +234,6 @@ class AdvancedVerificationService(
             }
         }
 
-        // Adicionar variação baseada no hash do User Agent para consistência por dispositivo
-        val uaHash = device.userAgent.hashCode()
-        val deviceVariation = (uaHash % 10) - 5 // -5 a +4 baseado no dispositivo
-        riskScore += deviceVariation
 
         // Verificar resolução de tela suspeita
         val resolution = device.screenResolution.split("x")
@@ -350,10 +320,6 @@ class AdvancedVerificationService(
             }
         }
 
-        // Variação baseada no padrão de comportamento específico
-        val behaviorHash = "${behavior.mouseMovements}_${behavior.keystrokes}_${behavior.sessionDuration}".hashCode()
-        val behaviorVariation = (behaviorHash % 8) - 4 // -4 a +3
-        riskScore += behaviorVariation
 
         // Verificar padrão de mouse suspeito (mais flexível para demo)
         if (behavior.mouseMovements < 1) {
